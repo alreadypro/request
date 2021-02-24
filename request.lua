@@ -1,3 +1,9 @@
+--[[
+
+	https://github.com/alreadypro/request
+
+]]
+
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 
@@ -22,12 +28,12 @@ local retryCodes = {408, 429, 500, 502, 503, 504, 522, 524}
 
 function request.request(method, ...)
 	local args = {...}
-	
+
 	local url = args[1]
 	local options = args[2]
 	local retries = args[3]
 	local callback = args[4]
-	
+
 	if not callback then
 		if typeof(options) == "function" then
 			callback = options
@@ -38,17 +44,16 @@ function request.request(method, ...)
 
 	options = typeof(options) == "function" and {} or typeof(options == "table") and options or {}
 	retries = typeof(retries) == "function" and 3 or typeof(retries) == "number" and retries or 3
-	
+
 	options.Url = url
 	options.Method = method or "GET"
 	options.Headers = options.Headers or {}
 	options.Headers["Content-Type"] = options.Headers["Content-Type"] or typeof(options.Body) == "table" and "application/json" or nil
 	options.Body = typeof(options.Body) == "table" and request.tojson(options.Body) or options.Body and tostring(options.Body) or nil
-	
+
 	local success, response = pcall(HttpService.RequestAsync, HttpService, options)
-	
+
 	if success and response.Success then
-		print(response.Body)
 		response.Body = request.fromjson(response.Body)
 		return callback and callback(response) or response
 	end
@@ -57,10 +62,10 @@ function request.request(method, ...)
 
 	local n = 0
 
-	while success and table.find(retryCodes, response.StatusCode) or retries > n do
+	while table.find(retryCodes, response.StatusCode) or retries > n do
 		warn("[Request] Retrying "..options.Method.." to "..options.Url..": "..(n + 1))
 		success, response = pcall(HttpService.RequestAsync, HttpService, options)
-		
+
 		if success then
 			if table.find(retryCodes, response.StatusCode) then
 				success = false
@@ -68,22 +73,22 @@ function request.request(method, ...)
 				return callback and callback(response) or response
 			end
 		end
-		
+
 		requestDelay *= 1.5
 		n += 1
 		pause(requestDelay)
 	end
-	
-	warn("[Request] "..options.Method.." to "..options.Url.." failed: "..response.StatusMessage)
-	
+
+	warn("[Request] "..options.Method.." to "..options.Url.." failed: "..response.StatusMessage or response)
+
 	response.Body = request.fromjson(response.Body)
-	
+
 	return callback and callback(response) or response
 end
 
 function request.tojson(arg)
 	local success, json = pcall(HttpService.JSONEncode, HttpService, arg)
-	
+
 	if success then
 		return json
 	else
