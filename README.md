@@ -10,16 +10,16 @@ Simple HttpService module that makes dealing with HttpService a breeze
 ### Usage
 
 ```lua
-request(url [, options = {Method = "GET"}[, retries = 3[,callback = nil]]])
-request.get(url[, options = {}[, retries = 3[,callback = nil]]])
-request.head(url[, options = {}[, retries = 3[,callback = nil]]])
-request.post(url[, options = {}[, retries = 3[,callback = nil]]])
-request.put(url[, options = {}[, retries = 3[,callback = nil]]])
-request.delete(url[, options = {}[, retries = 3[,callback = nil]]])
-request.connect(url[, options = {}[, retries = 3[,callback = nil]]])
-request.options(url[, options = {}[, retries = 3[,callback = nil]]])
-request.trace(url[, options = {}[, retries = 3[,callback = nil]]])
-request.patch(url[, options = {}[, retries = 3[,callback = nil]]])
+request(url [, options = {Method = "GET"} [, retries = 3 [,callback = nil]]])
+request.get(url [, options = {} [, retries = 3 [,callback = nil]]])
+request.head(url [, options = {} [, retries = 3 [,callback = nil]]])
+request.post(url [, options = {} [, retries = 3 [,callback = nil]]])
+request.put(url [, options = {} [, retries = 3 [,callback = nil]]])
+request.delete(url [, options = {} [, retries = 3 [,callback = nil]]])
+request.connect(url [, options = {} [, retries = 3 [,callback = nil]]])
+request.options(url [, options = {} [, retries = 3 [,callback = nil]]])
+request.trace(url [, options = {} [, retries = 3 [,callback = nil]]])
+request.patch(url [, options = {} [, retries = 3 [,callback = nil]]])
 ```
 
 When making a GET request, there is no need to specify a method
