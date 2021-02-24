@@ -1,9 +1,3 @@
---[[
-
-	https://github.com/alreadypro/request
-
-]]
-
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 
@@ -62,8 +56,11 @@ function request.request(method, ...)
 
 	local n = 0
 
-	while table.find(retryCodes, response.StatusCode) or retries > n do
-		warn("[Request] Retrying "..options.Method.." to "..options.Url..": "..(n + 1))
+	while table.find(retryCodes, response.StatusCode) and n >= retries do
+		n += 1
+		
+		warn("[Request] Retrying "..options.Method.." to "..options.Url..": "..n.."/"..retries)
+		
 		success, response = pcall(HttpService.RequestAsync, HttpService, options)
 
 		if success then
@@ -75,12 +72,12 @@ function request.request(method, ...)
 		end
 
 		requestDelay *= 1.5
-		n += 1
+		
 		pause(requestDelay)
 	end
-
-	warn("[Request] "..options.Method.." to "..options.Url.." failed: "..response.StatusMessage or response)
-
+	
+	warn("[Request] "..options.Method.." to "..options.Url.." failed: ".. response and (response.StatusCode .. " "..response.StatusMessage) or "Unknown Error")
+	
 	response.Body = request.fromjson(response.Body)
 
 	return callback and callback(response) or response
