@@ -42,7 +42,7 @@ local response = request("https://httpbin.org/get", {Method = "GET"})
 print(response)
 ```
 
-This works the same with POST, any any other HTTP methods you wish to use
+This works the same with POST, and any other HTTP methods you wish to use
 ```lua
 local response = request.post("https://httpbin.org/post", {Body = {foo = "bar"}})
 
