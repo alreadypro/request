@@ -1,3 +1,18 @@
+--[[
+
+	local request = require(this.module)
+	
+	-- examples
+	
+	request("https://httpbin.org/get")
+	request.get("https://httpbin.org/get")
+	
+	request("https://httpbin.org/post", {Method = "POST", Body = {foo = "bar"}})
+	request.post("https://httpbin.org/post", {Body = {foo = "bar"})
+	
+
+]]
+
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 
@@ -36,18 +51,19 @@ function request.request(method, ...)
 		end
 	end
 
-	options = options or {}
-	retries = retries or 3
+	options = typeof(options) == "function" and {} or typeof(options == "table") and options or {}
+	retries = typeof(retries) == "function" and 3 or typeof(retries) == "number" and retries or 3
 	
 	options.Url = url
 	options.Method = method or "GET"
 	options.Headers = options.Headers or {}
 	options.Headers["Content-Type"] = options.Headers["Content-Type"] or typeof(options.Body) == "table" and "application/json" or nil
-	options.Body = typeof(options.Body) == "table" and request.tojson(options.Body) or tostring(options.Body)
+	options.Body = typeof(options.Body) == "table" and request.tojson(options.Body) or options.Body and tostring(options.Body) or nil
 	
 	local success, response = pcall(HttpService.RequestAsync, HttpService, options)
 	
 	if success and response.Success then
+		print(response.Body)
 		response.Body = request.fromjson(response.Body)
 		return callback and callback(response) or response
 	end
@@ -57,11 +73,15 @@ function request.request(method, ...)
 	local n = 0
 
 	while success and table.find(retryCodes, response.StatusCode) or retries > n do
-		warn("[Request] Retrying "..method.." to "..url..": "..n)
+		warn("[Request] Retrying "..options.Method.." to "..options.Url..": "..(n + 1))
 		success, response = pcall(HttpService.RequestAsync, HttpService, options)
 		
-		if success and table.find(retryCodes, response.StatusCode) then
-			success = false
+		if success then
+			if table.find(retryCodes, response.StatusCode) then
+				success = false
+			else
+				return callback and callback(response) or response
+			end
 		end
 		
 		requestDelay *= 1.5
@@ -69,17 +89,31 @@ function request.request(method, ...)
 		pause(requestDelay)
 	end
 	
+	warn("[Request] "..options.Method.." to "..options.Url.." failed: "..response.StatusMessage)
+	
 	response.Body = request.fromjson(response.Body)
 	
 	return callback and callback(response) or response
 end
 
 function request.tojson(arg)
-	return HttpService:JSONEncode(arg)
+	local success, json = pcall(HttpService.JSONEncode, HttpService, arg)
+	
+	if success then
+		return json
+	else
+		return arg
+	end
 end
 
 function request.fromjson(arg)
-	return HttpService:JSONDecode(arg)
+	local success, str = pcall(HttpService.JSONDecode, HttpService, arg)
+
+	if success then
+		return str
+	else
+		return arg
+	end
 end
 
 for _,method in next, methods do
