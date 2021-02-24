@@ -1,18 +1,3 @@
---[[
-
-	local request = require(this.module)
-	
-	-- examples
-	
-	request("https://httpbin.org/get")
-	request.get("https://httpbin.org/get")
-	
-	request("https://httpbin.org/post", {Method = "POST", Body = {foo = "bar"}})
-	request.post("https://httpbin.org/post", {Body = {foo = "bar"})
-	
-
-]]
-
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 
